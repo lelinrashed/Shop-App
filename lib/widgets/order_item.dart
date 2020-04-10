@@ -42,6 +42,7 @@ class _OrderItemState extends State<OrderItem> {
                 widget.order.products.length * 20.0 + 100,
                 180,
               ),
+              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
               child: ListView(
                 children: widget.order.products.map((prod) =>
                   Row(
@@ -55,7 +56,7 @@ class _OrderItemState extends State<OrderItem> {
                         ),
                       ),
                       Text(
-                        '${prod.quantity} tk ${prod.price}',
+                        '${prod.quantity}  (${prod.price}) tk',
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.grey,

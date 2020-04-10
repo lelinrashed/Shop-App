@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:shopapp/widgets/cart_item.dart';
 
 class CartItem {
   final String id;

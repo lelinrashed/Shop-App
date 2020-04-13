@@ -42,10 +42,12 @@ class Products with ChangeNotifier {
   ];
 
   String _authToken;
+  String _userId;
 
-  void update(String token, List<dynamic> item) {
+  void update(String token, List<dynamic> item, String userId) {
     _authToken = token;
     _items = item;
+    _userId = userId;
   }
 
   List<Product> get items {
@@ -60,8 +62,9 @@ class Products with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
-  Future<void> fetchAndSetProducts() async {
-    final url = 'https://flutter-shop-53320.firebaseio.com/products.json?auth=$_authToken';
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$_userId"' : '';
+    final url = 'https://flutter-shop-53320.firebaseio.com/products.json?auth=$_authToken&$filterString';
     try {
       final response = await http.get(url);
       final List<Product> loadedProducts = [];
@@ -69,13 +72,15 @@ class Products with ChangeNotifier {
       if (extractedData == null) {
         return;
       }
+      final favoriteResponse = await http.get('https://flutter-shop-53320.firebaseio.com/userFavourits/$_userId/.json?auth=$_authToken');
+      final favoriteData = json.decode(favoriteResponse.body);
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
           id: prodId,
           title: prodData['title'],
           description: prodData['description'],
           price: prodData['price'],
-          isFavourit: prodData['isFavourit'],
+          isFavourit: favoriteData == null ? false : favoriteData[prodId] ?? false,
           imageUrl: prodData['imageUrl'],
         ));
       });
@@ -96,7 +101,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavourit': product.isFavourit,
+          'creatorId': _userId,
         }),
       );
       final newProduct = Product(
